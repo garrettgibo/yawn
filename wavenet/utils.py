@@ -38,10 +38,10 @@ def mp3_to_wav(input_folder: str, output_folder: str, filename: str) -> None:
 
 def create_wav_folder(input_folder: str) -> str:
     """Create the wav output folder"""
-    output_folder = input_folder + "_wav"
+    wav_folder = input_folder + "_wav"
 
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        logger.info("Created output folder: %s", output_folder)
+    if not os.path.exists(wav_folder):
+        os.makedirs(wav_folder)
+        logger.info("Created wav folder: %s", wav_folder)
 
-    return output_folder
+    return wav_folder
