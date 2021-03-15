@@ -4,7 +4,10 @@ import os
 
 from pydub import AudioSegment
 
-from .logger import logger
+from wavenet.logger import new_logger
+
+
+logger = new_logger(__name__)
 
 
 def get_data() -> None:
