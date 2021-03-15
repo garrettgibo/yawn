@@ -3,8 +3,11 @@
 import argparse
 import json
 
+from wavenet.logger import new_logger
 from wavenet.utils import get_data, convert_mp3_folder
-from wavenet.logger import logger
+
+
+logger = new_logger(__name__)
 
 TARGETS = {
     "get-data": get_data,
@@ -15,6 +18,7 @@ CONFIGS = {
     "get-data": ...,
     "mp3-to-wav": "config/mp3-to-wav.json"
 }
+
 
 def main():
     """Run WaveNet Pipeline/call designated targets"""
