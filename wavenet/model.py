@@ -2,6 +2,7 @@
 Networks and components that define WaveNet
 """
 import torch
+import torch.nn as nn
 
 
 class WaveNet(torch.nn.Module):
@@ -15,28 +16,58 @@ class WaveNet(torch.nn.Module):
         return data
 
 
-class DilatedCauasalConvolution(torch.nn.Module):
-    """TODO: class docstring"""
+class GatedDilatedCauasalConvolution(torch.nn.Module):
+    """Creates a causal dilated convolution layer with gated activation unit"""
 
-    def __init__(self):
-        """TODO: forward pass docstring"""
+    def __init__(self, in_channels: int, out_channels: int, dilation: int):
+        """Initialize a dilated convolution.
+
+        Args:
+            in_channels: number of input channels
+            out_channels: number of output channels
+            dilation: dilation size
+
+        """
         super().__init__()
+        self.conv_filter = nn.Conv1d(
+            in_channels,
+            out_channels,
+            kernel_size=2,
+            stride=1,
+            dilation=dilation,
+            padding=0,
+            bias=False,
+        )
+        self.conv_gate = nn.Conv1d(
+            in_channels,
+            out_channels,
+            kernel_size=2,
+            stride=1,
+            dilation=dilation,
+            padding=0,
+            bias=False,
+        )
+        self.tanh = nn.Tanh()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, data):
-        """TODO: forward pass docstring"""
-        return data
+        """Apply gated activation unit to dilated convolutions.
 
+        From: https://arxiv.org/abs/1606.05328
+            z = tanh(W_{f, k} ∗ x) ⊙ σ(W_{g,k} ∗ x)
 
-class GatedActivationUnit(torch.nn.Module):
-    """TODO: class docstring"""
+        Where:
+            ∗ denotes a convolution operator
+            ⊙denotes and element-wise multiplication operator
+            σ(·) is a sigmoid function
+            k is the layer index
+            f and g denote filter and gate respectively
+            W is learnable convolution filter
 
-    def __init__(self):
-        """TODO: forward pass docstring"""
-        super().__init__()
+        """
+        output = self.tanh(self.conv_filter(data)) * self.sigmoid(self.conv_gate(data))
 
-    def forward(self, data):
-        """TODO: forward pass docstring"""
-        return data
+        return output
 
 
 class ResidualBlock(torch.nn.Module):
