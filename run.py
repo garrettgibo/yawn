@@ -5,8 +5,7 @@ import json
 
 from wavenet import demo
 from wavenet.logger import new_logger
-from wavenet.utils import get_data, convert_mp3_folder
-
+from wavenet.utils import convert_mp3_folder, get_data
 
 logger = new_logger(__name__)
 
@@ -19,7 +18,7 @@ TARGETS = {
 CONFIGS = {
     "demo": "config/demo.json",
     "get-data": ...,
-    "mp3-to-wav": "config/mp3-to-wav.json"
+    "mp3-to-wav": "config/mp3-to-wav.json",
 }
 
 

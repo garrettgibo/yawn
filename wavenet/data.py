@@ -9,21 +9,22 @@ from typing import List
 import numpy as np
 from scipy.io import wavfile
 from torch.utils.data import Dataset
-
 from wavenet.logger import new_logger
-
 
 logger = new_logger(__name__)
 
 
 class WAVData(Dataset):
     """Create PyTorch dataset from folder of WAV files"""
-    def __init__(self,
-                 input_folder: str,
-                 input_length: int,
-                 output_length: int,
-                 mu: int=255,
-                 num_classes: int=256):
+
+    def __init__(
+        self,
+        input_folder: str,
+        input_length: int,
+        output_length: int,
+        mu: int = 255,
+        num_classes: int = 256,
+    ):
         self.input_folder = input_folder
         self.input_length = int(input_length)
         self.output_length = int(output_length)
@@ -46,11 +47,17 @@ class WAVData(Dataset):
         for track in track_list:
             extracted_data = self._extract_data(track)
             data.extend(extracted_data)
-            logger.debug("Added track [%d] points from [%s] to dataset",
-                         len(extracted_data), track.split("/")[-1])
+            logger.debug(
+                "Added track [%d] points from [%s] to dataset",
+                len(extracted_data),
+                track.split("/")[-1],
+            )
 
-        logger.info("Created dataset from files in [%s] with length: [%d]",
-                    self.input_folder, len(data))
+        logger.info(
+            "Created dataset from files in [%s] with length: [%d]",
+            self.input_folder,
+            len(data),
+        )
 
         return data
 
@@ -68,10 +75,12 @@ class WAVData(Dataset):
 
         # Iterate over data as many times as allowed
         for i in range(0, len(data) - data_length, data_length):
-            data_segments.append({
-                "x": data[i: i + self.input_length],
-                "y": data[i + self.input_length: i + data_length]
-            })
+            data_segments.append(
+                {
+                    "x": data[i : i + self.input_length],
+                    "y": data[i + self.input_length : i + data_length],
+                }
+            )
 
         return data_segments
 
@@ -84,8 +93,13 @@ class WAVData(Dataset):
         if len(data.shape) > 1:
             data = np.mean(data, axis=1)
 
-        logger.debug("Loaded track [%s] with sample rate [%d] and length [%d]",
-                     filename.split("/")[-1], sample_rate, len(data))
+        logger.debug(
+            "Loaded track [%s] with sample rate [%d] and length [%d]",
+            filename.split("/")[-1],
+            sample_rate,
+            len(data),
+        )
+
         return data
 
     def _quantize(self, data: np.ndarray) -> np.ndarray:
@@ -104,6 +118,8 @@ class WAVData(Dataset):
 
     def mu_law_decoding(self, data: np.ndarray) -> np.ndarray:
         """Apply non-linear mu-law decoding"""
-        data = np.sign(data) * (np.exp(np.abs(data) * np.log(self.mu + 1)) - 1) / self.mu
+        data = (
+            np.sign(data) * (np.exp(np.abs(data) * np.log(self.mu + 1)) - 1) / self.mu
+        )
 
         return data
