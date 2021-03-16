@@ -16,8 +16,8 @@ class WaveNet(torch.nn.Module):
         return data
 
 
-class GatedDilatedCauasalConvolution(torch.nn.Module):
-    """Creates a causal dilated convolution layer with gated activation unit"""
+class DilatedCauasalConvolution(torch.nn.Module):
+    """Creates a causal dilated convolution layer"""
 
     def __init__(self, in_channels: int, out_channels: int, dilation: int):
         """Initialize a dilated convolution.
@@ -47,13 +47,29 @@ class GatedDilatedCauasalConvolution(torch.nn.Module):
             padding=0,
             bias=False,
         )
+
+    def forward(self, data):
+        """Apply dilated convolutions and create filter and gates ouputs"""
+        filter_output = self.conv_filter(data)
+        gate_output = self.conv_gate(data)
+
+        return filter_output, gate_output
+
+
+class GatedActivationUnit(torch.nn.Module):
+    """Creates a gated activation unit layer"""
+
+    def __init__(self):
+        """Initialize a gated activation unit"""
+        super().__init__()
         self.tanh = nn.Tanh()
         self.sigmoid = nn.Sigmoid()
 
-    def forward(self, data):
+    def forward(self, filter_data, gate_data):
         """Apply gated activation unit to dilated convolutions.
 
-        From: https://arxiv.org/abs/1606.05328
+        From:
+            https://arxiv.org/abs/1606.05328
             z = tanh(W_{f, k} ∗ x) ⊙ σ(W_{g,k} ∗ x)
 
         Where:
@@ -65,7 +81,7 @@ class GatedDilatedCauasalConvolution(torch.nn.Module):
             W is learnable convolution filter
 
         """
-        output = self.tanh(self.conv_filter(data)) * self.sigmoid(self.conv_gate(data))
+        output = self.tanh(filter_data) * self.sigmoid(gate_data)
 
         return output
 
