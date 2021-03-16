@@ -1,13 +1,12 @@
-# WaveNetClone
-
+# YAWN
 [![Lint Code Base](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml/badge.svg)](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml)
 
-An implementation of the WaveNet (
-[Blog](https://deepmind.com/blog/article/wavenet-generative-model-raw-audio),
-[Paper](https://arxiv.org/abs/1609.03499))
-architecture in PyTorch that is trained on music from the [Free Music Archive (FMA)](https://github.com/mdeff/fma) dataset.
+Yet Another WaveNet
 
-This implementation was inspired by the following sources:
+- [Blog](https://deepmind.com/blog/article/wavenet-generative-model-raw-audio),
+- [Paper](https://arxiv.org/abs/1609.03499))
+
+This implementation is inspired by the following sources:
 
 - [Dankrushen/Wavenet-PyTorch](https://github.com/Dankrushen/Wavenet-PyTorch)
 - [vincentherrmann/pytorch-wavenet](https://github.com/vincentherrmann/pytorch-wavenet)
