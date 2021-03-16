@@ -1,17 +1,13 @@
 """Demo of WaveNet Pipeline"""
 
 from torch.utils.data import DataLoader
-
 from wavenet.data import WAVData
 from wavenet.utils import convert_mp3_folder
 
 
-def demo(mp3_to_wav_cfg,
-         dataset_cfg,
-         dataloader_cfg,
-         model_cfg,
-         train_cfg,
-         generator_cfg):
+def demo(
+    mp3_to_wav_cfg, dataset_cfg, dataloader_cfg, model_cfg, train_cfg, generator_cfg
+):
     """Simple workflow for running through full data/train/evaluate pipeline"""
     # convert folder of mp3 files WAV files
     dataset_cfg["input_folder"] = convert_mp3_folder(**mp3_to_wav_cfg)
