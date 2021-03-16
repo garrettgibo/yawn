@@ -1,0 +1,19 @@
+{
+    "mp3_to_wav_cfg": {
+        "input_folder": "data/sample",
+        "sample_rate": 16000
+    },
+    "dataset_cfg": {
+        "input_length": 2e5,
+        "output_length": 1e5,
+        "mu": 255,
+        "num_classes": 256
+    },
+    "dataloader_cfg": {
+        "batch_size": 10,
+        "shuffle": true
+    },
+    "model_cfg": {},
+    "train_cfg": {},
+    "generator_cfg": {}
+}
