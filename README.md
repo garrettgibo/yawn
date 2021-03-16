@@ -11,7 +11,7 @@ architecture in PyTorch that is trained on music from the [Free Music Archive (F
 
 For a full pipeline that goes through the following steps:
 
-1. Convert directory of mp3 files to directory of WAV files at the specified
+1. Convert directory of mp3 files to directory of WAV files at the specified 
 sample rate
 
 2. Create PyTorch Dataset from directory of WAV files
