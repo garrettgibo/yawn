@@ -7,6 +7,13 @@ An implementation of the WaveNet (
 [Paper](https://arxiv.org/abs/1609.03499))
 architecture in PyTorch that is trained on music from the [Free Music Archive (FMA)](https://github.com/mdeff/fma) dataset.
 
+This implementation was inspired by the following sources:
+
+- [Dankrushen/Wavenet-PyTorch](https://github.com/Dankrushen/Wavenet-PyTorch)
+- [vincentherrmann/pytorch-wavenet](https://github.com/vincentherrmann/pytorch-wavenet)
+- [ibab/tensorflow-wavenet](https://github.com/ibab/tensorflow-wavenet)
+- [musyoku/wavenet](https://github.com/musyoku/wavenet)
+
 ## Usage
 
 For a full pipeline that goes through the following steps:
