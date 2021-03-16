@@ -1,3 +1,4 @@
 {
-    "input_folder": "data/sample"
+    "input_folder": "data/sample",
+    "sample_rate": 16000
 }
