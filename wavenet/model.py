@@ -9,6 +9,21 @@ class WaveNet(torch.nn.Module):
     """TODO: class docstring"""
 
     def __init__(self):
+class CausalConv(torch.nn.Module):
+    """Causal Convolution for WaveNet"""
+
+    def __init__(self, in_channels, out_channels):
+        """Initialize causal convolution"""
+        super().__init__()
+        self.conv = torch.nn.Conv1d(
+            in_channels, out_channels, kernel_size=2, stride=1, padding=1, bias=False
+        )
+
+    def forward(self, data):
+        """Apply causal convolution"""
+        return self.conv(data)
+
+
 class ResidualStack(torch.nn.Module):
     """Create a stack of residual layers"""
 
