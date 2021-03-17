@@ -139,4 +139,4 @@ class WAVDataLoader(DataLoader):
         super().__init__(
             dataset, shuffle=shuffle, batch_size=batch_size, num_workers=num_workers
         )
-        logger = utils.new_logger("WAVDataLoader", level=log_level)
+        self.logger = utils.new_logger("WAVDataLoader", level=log_level)
