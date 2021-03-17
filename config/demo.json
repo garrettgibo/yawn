@@ -13,7 +13,17 @@
         "batch_size": 10,
         "shuffle": true
     },
-    "model_cfg": {},
-    "train_cfg": {},
+    "model_cfg": {
+        "in_channels": 1,
+        "res_channels": 1
+    },
+    "train_cfg": {
+        "model_name": "wavenet",
+        "num_epochs": 100,
+        "learning_rate": 0.001,
+        "resume": false,
+        "checkpoint_path": null,
+        "save_every": 5
+    },
     "generator_cfg": {}
 }
