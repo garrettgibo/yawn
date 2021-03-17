@@ -34,8 +34,8 @@ def train(
         checkpoint_path: Path to model state_dict to load from if resuming train
         save_every: Number of epochs inbetween saves
     """
-    current_time = time.time()
-    model_name = model_name + current_time.strftime("%m_%d_%y_%H_%M_%S")
+    current_time = time.strftime("%m_%d_%y_%H_%M_%S", time.localtime())
+    model_name = model_name + current_time
 
     criterion = nn.CrossEntropyLoss()
 
