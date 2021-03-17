@@ -1,8 +1,8 @@
 """Demo of WaveNet Pipeline"""
 
 from torch.utils.data import DataLoader
-from wavenet.data import WAVData
 from wavenet.utils import convert_mp3_folder
+from wavenet.utils.data import WAVData
 
 
 def demo(

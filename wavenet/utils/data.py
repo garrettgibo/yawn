@@ -9,7 +9,7 @@ from typing import List
 import numpy as np
 from scipy.io import wavfile
 from torch.utils.data import Dataset
-from wavenet.logger import new_logger
+from wavenet.utils import new_logger
 
 logger = new_logger(__name__)
 

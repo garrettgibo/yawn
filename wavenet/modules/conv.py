@@ -1,50 +1,8 @@
-"""
-Networks and components that define WaveNet
-"""
-from collections import OrderedDict
-
+"""Convolution layers for WaveNet"""
 import torch
 import torch.nn as nn
-
-
-class WaveNet(torch.nn.Module):
-    """Full WaveNet implementation.
-
-    Major architecture is based off of Figure 4 in:
-    https://arxiv.org/abs/1609.03499
-    """
-
-    def __init__(self, in_channels: int, res_channels: int):
-        """Initialize WaveNet.
-
-        Args:
-            in_channels: number of channels for input channel. The number of
-                skip channels is the same as input channels.
-            res_channels: number of channels for residual input and output
-        """
-        super().__init__()
-        self.model = nn.Sequential(
-            OrderedDict(
-                [
-                    ("causal_conv", CausalConv(in_channels, res_channels)),
-                    (
-                        "residual_stack",
-                        ResidualStack(
-                            in_channels=res_channels, out_channels=in_channels
-                        ),
-                    ),
-                    ("conv_1", nn.Conv1d(in_channels, in_channels, kernel_size=1)),
-                    ("relu_1", nn.ReLU()),
-                    ("conv_2", nn.Conv1d(in_channels, in_channels, kernel_size=1)),
-                    ("relu_2", nn.ReLU()),
-                    ("softmax", nn.Softmax()),
-                ]
-            )
-        )
-
-    def forward(self, data):
-        """Forward pass through full architecture"""
-        return self.model(data)
+import wavenet
+from wavenet.modules import GatedActivationUnit
 
 
 class CausalConv(torch.nn.Module):
@@ -142,7 +100,7 @@ class ResidualLayer(torch.nn.Module):
         )
         self.gated_activation = GatedActivationUnit()
         self.conv = nn.Conv1d(
-            out_channels, out_channels, kernel_size=1, stride=1, bias=False,
+            out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False
         )
 
     def forward(self, data):
@@ -193,33 +151,3 @@ class DilatedCausalConvolution(torch.nn.Module):
         gate_output = self.conv_gate(data)
 
         return filter_output, gate_output
-
-
-class GatedActivationUnit(torch.nn.Module):
-    """Gated activation unit layer from PixelCNN"""
-
-    def __init__(self):
-        """Initialize a gated activation unit"""
-        super().__init__()
-        self.tanh = nn.Tanh()
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, filter_data, gate_data):
-        """Apply gated activation unit to dilated convolutions.
-
-        From:
-            https://arxiv.org/abs/1606.05328
-            z = tanh(W_{f, k} ∗ x) ⊙ σ(W_{g,k} ∗ x)
-
-        Where:
-            ∗ denotes a convolution operator
-            ⊙denotes and element-wise multiplication operator
-            σ(·) is a sigmoid function
-            k is the layer index
-            f and g denote filter and gate respectively
-            W is learnable convolution filter
-
-        """
-        output = self.tanh(filter_data) * self.sigmoid(gate_data)
-
-        return output
