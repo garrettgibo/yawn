@@ -6,58 +6,71 @@ import torch
 import wavenet.utils as utils
 from pydub import AudioSegment
 
-logger = utils.new_logger(__name__)
-
 
 def get_data() -> None:
     """Download dataset into data directory"""
     pass
 
 
-def convert_mp3_folder(input_folder: str, sample_rate: float) -> str:
-    """Convert all mp3 files in folder into wav files"""
-    logger.info(
-        "Converting mp3 files located in [%s] to WAV with sample rate [%d]",
-        input_folder,
-        sample_rate,
-    )
+class Mp3Converter:
+    """Convert provided into WAV files"""
 
-    output_folder = create_wav_folder(input_folder)
-    mp3_files = glob.glob(input_folder + "/*.mp3")
+    def __init__(self, input_folder: str, sample_rate: int, log_level: int = 20):
+        """Initialize an mp3 to WAV converter
 
-    for mp3_path in mp3_files:
-        mp3_file = mp3_path.split("/")[-1]
-        mp3_to_wav(input_folder, output_folder, mp3_file, sample_rate)
+        Args:
+            input_folder: path to folder of mp3 files to convert
+            sample_rate: desired sample rate to set WAV files to
+            log_level: level to log at for converter. Default is 20 (logging.INFO)
+        """
+        self.logger = utils.new_logger("Mp3Converter", level=log_level)
+        self.input_folder = input_folder
+        self.sample_rate = sample_rate
 
-    logger.info("Converted WAV files located in [%s]", output_folder)
+    def convert(self) -> str:
+        """Convert all mp3 files in folder into wav files"""
+        self.logger.info(
+            "Converting mp3 files located in [%s] to WAV with sample rate [%d]",
+            self.input_folder,
+            self.sample_rate,
+        )
 
-    return output_folder
+        output_folder = self.create_wav_folder()
+        mp3_files = glob.glob(self.input_folder + "/*.mp3")
 
+        for mp3_path in mp3_files:
+            mp3_file = mp3_path.split("/")[-1]
+            self.mp3_to_wav(output_folder, mp3_file)
 
-def mp3_to_wav(
-    input_folder: str, output_folder: str, filename: str, sample_rate: float
-) -> None:
-    """Convert mp3 file to wav file"""
-    mp3_full_path = os.path.join(input_folder, filename)
-    wav_full_path = os.path.join(output_folder, filename.replace("mp3", "wav"))
+        self.logger.info("Converted WAV files located in [%s]", output_folder)
 
-    if not os.path.exists(wav_full_path):
-        mp3 = AudioSegment.from_mp3(mp3_full_path)
-        mp3.export(wav_full_path, format="wav", parameters=["-ar", f"{sample_rate}"])
-        logger.debug("Converted %s to wav file", filename)
-    else:
-        logger.debug("%s already converted to wav file", filename)
+        return output_folder
 
+    def mp3_to_wav(self, output_folder: str, filename: str) -> None:
+        """Convert mp3 file to wav file"""
+        mp3_full_path = os.path.join(self.input_folder, filename)
+        wav_full_path = os.path.join(output_folder, filename.replace("mp3", "wav"))
 
-def create_wav_folder(input_folder: str) -> str:
-    """Create the wav output folder"""
-    wav_folder = input_folder + "_wav"
+        if not os.path.exists(wav_full_path):
+            mp3 = AudioSegment.from_mp3(mp3_full_path)
+            mp3.export(
+                wav_full_path, format="wav", parameters=["-ar", f"{self.sample_rate}"]
+            )
+            self.logger.debug("Converted %s to wav file", filename)
+        else:
+            self.logger.warning("%s already converted to wav file", filename)
 
-    if not os.path.exists(wav_folder):
-        os.makedirs(wav_folder)
-        logger.info("Created wav folder: %s", wav_folder)
+    def create_wav_folder(self) -> str:
+        """Create the wav output folder"""
+        wav_folder = self.input_folder + "_wav"
 
-    return wav_folder
+        if not os.path.exists(wav_folder):
+            os.makedirs(wav_folder)
+            self.logger.info("Created wav folder: %s", wav_folder)
+        else:
+            self.logger.warning("Wav folder already created at %s", wav_folder)
+
+        return wav_folder
 
 
 def load_model(model, optimizer, path: str):
