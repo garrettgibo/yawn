@@ -2,10 +2,11 @@
 import glob
 import os
 
+import torch
+import wavenet.utils as utils
 from pydub import AudioSegment
-from wavenet.utils import new_logger
 
-logger = new_logger(__name__)
+logger = utils.new_logger(__name__)
 
 
 def get_data() -> None:
@@ -57,3 +58,45 @@ def create_wav_folder(input_folder: str) -> str:
         logger.info("Created wav folder: %s", wav_folder)
 
     return wav_folder
+
+
+def load_model(model, optimizer, path: str):
+    """Wrapper around loading a PyTorch model.
+
+    Args:
+        model: The model to be loaded into
+        optimizer: The optimizer being used on the provided model
+        path: Path to checkpoint to load
+
+    """
+    # Read checkpoint contents
+    checkpoint = torch.load(path)
+
+    # Load checkpoint contents into provded model and optimizer
+    model.load_state_dict(checkpoint["net"])
+    optimizer.load_state_dict(checkpoint["optim"])
+    epoch = checkpoint["epoch"]
+
+    logger.info("Restored checkpint from %s", path)
+
+    return model, optimizer, epoch
+
+
+def save_model(model, optimizer, epoch: int, name: str) -> None:
+    """Wrapper around saving a PyTorch model.
+
+    Args:
+        model: The model that is saved.
+        optimizer: The optimizer being used on the provided model
+        epoch: Current epoch number
+        name: Name of checkpoint
+
+    """
+    checkpoint = {
+        "epoch": epoch,
+        "net": model.state_dict(),
+        "optim": optimizer.state_dict(),
+    }
+    torch.save(checkpoint, name)
+
+    logger.info("Saving model at epoch [%d]", epoch)
