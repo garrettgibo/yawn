@@ -8,7 +8,8 @@ from typing import List
 
 import numpy as np
 from scipy.io import wavfile
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
+from torch.utils.data.sampler import BatchSampler, RandomSampler
 from wavenet.utils import new_logger
 
 logger = new_logger(__name__)
@@ -123,3 +124,12 @@ class WAVData(Dataset):
         )
 
         return data
+
+
+class WAVDataLoader(DataLoader):
+    """Simple dataloader wrapper."""
+
+    def __init__(self, dataset, shuffle: bool, batch_size: int, num_workers: int = 1):
+        super().__init__(
+            dataset, shuffle=shuffle, batch_size=batch_size, num_workers=num_workers
+        )

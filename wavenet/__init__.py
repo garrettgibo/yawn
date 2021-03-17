@@ -1,8 +1,7 @@
 """Demo of WaveNet Pipeline"""
 import wavenet.utils as utils
-from torch.utils.data import DataLoader
 from wavenet.modules import WaveNet
-from wavenet.utils.data import WAVData
+from wavenet.utils.data import WAVData, WAVDataLoader
 
 
 def demo(
@@ -16,7 +15,7 @@ def demo(
     dataloader_cfg["dataset"] = WAVData(**dataset_cfg)
 
     # create dataloader
-    train_cfg["dataloader"] = DataLoader(**dataloader_cfg)
+    train_cfg["train_dataloader"] = WAVDataLoader(**dataloader_cfg)
 
     # Create wavenet model
     train_cfg["model"] = WaveNet(**model_cfg)
