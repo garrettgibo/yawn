@@ -3,15 +3,15 @@
 import argparse
 import json
 
-from wavenet import train
-from wavenet.utils import Mp3Converter, get_data, new_logger
+import wavenet
+import wavenet.utils as utils
 
-logger = new_logger("run")
+logger = utils.new_logger("run")
 
 TARGETS = {
-    "train": train,
-    "get-data": get_data,
-    "mp3-to-wav": Mp3Converter,
+    "train": wavenet.train_pipeline,
+    "get-data": utils.get_data,
+    "mp3-to-wav": utils.Mp3Converter,
 }
 
 CONFIGS = {

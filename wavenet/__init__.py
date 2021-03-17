@@ -4,7 +4,7 @@ from wavenet.modules import WaveNet
 from wavenet.utils.data import WAVData, WAVDataLoader
 
 
-def train(
+def train_pipeline(
     mp3_to_wav_cfg: dict,
     dataset_cfg: dict,
     dataloader_cfg: dict,
