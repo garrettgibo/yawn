@@ -4,8 +4,7 @@ import argparse
 import json
 
 from wavenet import demo
-from wavenet.logger import new_logger
-from wavenet.utils import convert_mp3_folder, get_data
+from wavenet.utils import convert_mp3_folder, get_data, new_logger
 
 logger = new_logger(__name__)
 

@@ -3,7 +3,7 @@ import glob
 import os
 
 from pydub import AudioSegment
-from wavenet.logger import new_logger
+from wavenet.utils import new_logger
 
 logger = new_logger(__name__)
 
