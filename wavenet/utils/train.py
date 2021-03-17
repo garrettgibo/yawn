@@ -10,8 +10,6 @@ import torch.nn as nn
 import wavenet.utils as utils
 from tqdm import tqdm
 
-logger = utils.new_logger(__name__)
-
 
 def train(
     model,
@@ -22,6 +20,7 @@ def train(
     resume: bool = False,
     checkpoint_path: str = None,
     save_every: int = 10,
+    log_level: int = 30,
 ):
     """Train model.
 
@@ -34,6 +33,8 @@ def train(
         checkpoint_path: Path to model state_dict to load from if resuming train
         save_every: Number of epochs inbetween saves
     """
+    logger = utils.new_logger("Train", level=log_level)
+
     current_time = time.strftime("%m_%d_%y_%H_%M_%S", time.localtime())
     model_name = model_name + current_time
 
@@ -51,6 +52,7 @@ def train(
     start_epoch = 0
     if resume:
         model, optim, start_epoch = utils.load_model(model, optim, checkpoint_path)
+        logger.info("Loaded checkpoint from: %s", checkpoint_path)
 
     # Main training loop
     for epoch in range(start_epoch, start_epoch + num_epochs):
@@ -88,8 +90,10 @@ def train(
             if epoch % save_every == save_every - 1:
                 ckpt_name = f"{model_name}_epoch_{epoch}.pt"
                 utils.save_model(model, optim, epoch, ckpt_name)
+                logger.info("Saved model at epoch: %d", epoch)
 
     ckpt_name = f"{model_name}_fin.pt"
     utils.save_model(model, optim, epoch, ckpt_name)
+    logger.info("Saved Final Model")
 
     return ckpt_name
