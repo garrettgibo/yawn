@@ -142,12 +142,7 @@ class ResidualLayer(torch.nn.Module):
         )
         self.gated_activation = GatedActivationUnit()
         self.conv = nn.Conv1d(
-            out_channels,
-            out_channels,
-            kernel_size=1,
-            stride=1,
-            padding=0,
-            bias=False,
+            out_channels, out_channels, kernel_size=1, stride=1, bias=False,
         )
 
     def forward(self, data):
