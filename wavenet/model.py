@@ -8,7 +8,11 @@ import torch.nn as nn
 
 
 class WaveNet(torch.nn.Module):
-    """TODO: class docstring"""
+    """Full WaveNet implementation.
+
+    Major architecture is based off of Figure 4 in:
+    https://arxiv.org/abs/1609.03499
+    """
 
     def __init__(self, in_channels: int, res_channels: int):
         """Initialize WaveNet.
@@ -59,7 +63,7 @@ class CausalConv(torch.nn.Module):
 
 
 class ResidualStack(torch.nn.Module):
-    """Create a stack of residual layers"""
+    """Stack of ResidualLayers"""
 
     def __init__(
         self,
@@ -128,7 +132,7 @@ class ResidualStack(torch.nn.Module):
 
 
 class ResidualLayer(torch.nn.Module):
-    """Create a single residual layer"""
+    """Single residual layer"""
 
     def __init__(self, in_channels: int, out_channels: int, dilation: int):
         """Initialize a residual layer"""
@@ -157,7 +161,7 @@ class ResidualLayer(torch.nn.Module):
 
 
 class DilatedCausalConvolution(torch.nn.Module):
-    """Creates a causal dilated convolution layer"""
+    """Dilated causal convolution layer"""
 
     def __init__(self, in_channels: int, out_channels: int, dilation: int):
         """Initialize a dilated convolution.
@@ -197,7 +201,7 @@ class DilatedCausalConvolution(torch.nn.Module):
 
 
 class GatedActivationUnit(torch.nn.Module):
-    """Creates a gated activation unit layer"""
+    """Gated activation unit layer from PixelCNN"""
 
     def __init__(self):
         """Initialize a gated activation unit"""
