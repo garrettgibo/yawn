@@ -90,8 +90,6 @@ def load_model(model, optimizer, path: str):
     optimizer.load_state_dict(checkpoint["optim"])
     epoch = checkpoint["epoch"]
 
-    logger.info("Restored checkpint from %s", path)
-
     return model, optimizer, epoch
 
 
@@ -111,5 +109,3 @@ def save_model(model, optimizer, epoch: int, name: str) -> None:
         "optim": optimizer.state_dict(),
     }
     torch.save(checkpoint, name)
-
-    logger.info("Saving model at epoch [%d]", epoch)

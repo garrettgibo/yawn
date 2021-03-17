@@ -7,12 +7,9 @@ import glob
 from typing import List
 
 import numpy as np
+import wavenet.utils as utils
 from scipy.io import wavfile
 from torch.utils.data import DataLoader, Dataset
-from torch.utils.data.sampler import BatchSampler, RandomSampler
-from wavenet.utils import new_logger
-
-logger = new_logger(__name__)
 
 
 class WAVData(Dataset):
@@ -25,7 +22,9 @@ class WAVData(Dataset):
         output_length: int,
         mu: int = 255,
         num_classes: int = 256,
+        log_level: int = 20,
     ):
+        self.logger = utils.new_logger("WAVData", level=log_level)
         self.input_folder = input_folder
         self.input_length = int(input_length)
         self.output_length = int(output_length)
@@ -42,19 +41,19 @@ class WAVData(Dataset):
 
     def _create_data(self, track_list: List[str]) -> np.ndarray:
         """Create dataset from list of track names"""
-        logger.info("Creating dataset from files in [%s]", self.input_folder)
+        self.logger.info("Creating dataset from files in [%s]", self.input_folder)
         data = []
 
         for track in track_list:
             extracted_data = self._extract_data(track)
             data.extend(extracted_data)
-            logger.debug(
+            self.logger.debug(
                 "Added track [%d] points from [%s] to dataset",
                 len(extracted_data),
                 track.split("/")[-1],
             )
 
-        logger.info(
+        self.logger.info(
             "Created dataset from files in [%s] with length: [%d]",
             self.input_folder,
             len(data),
@@ -94,7 +93,7 @@ class WAVData(Dataset):
         if len(data.shape) > 1:
             data = np.mean(data, axis=1)
 
-        logger.debug(
+        self.logger.debug(
             "Loaded track [%s] with sample rate [%d] and length [%d]",
             filename.split("/")[-1],
             sample_rate,
@@ -129,7 +128,15 @@ class WAVData(Dataset):
 class WAVDataLoader(DataLoader):
     """Simple dataloader wrapper."""
 
-    def __init__(self, dataset, shuffle: bool, batch_size: int, num_workers: int = 1):
+    def __init__(
+        self,
+        dataset,
+        shuffle: bool,
+        batch_size: int,
+        num_workers: int = 1,
+        log_level: int = 20,
+    ):
         super().__init__(
             dataset, shuffle=shuffle, batch_size=batch_size, num_workers=num_workers
         )
+        logger = utils.new_logger("WAVDataLoader", level=log_level)

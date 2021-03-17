@@ -4,12 +4,25 @@ from wavenet.modules import WaveNet
 from wavenet.utils.data import WAVData, WAVDataLoader
 
 
-def demo(
-    mp3_to_wav_cfg, dataset_cfg, dataloader_cfg, model_cfg, train_cfg, generator_cfg
+def train(
+    mp3_to_wav_cfg: dict,
+    dataset_cfg: dict,
+    dataloader_cfg: dict,
+    model_cfg: dict,
+    train_cfg: dict,
+    generator_cfg: dict,
+    log_level: int,
 ):
     """Simple workflow for running through full data/train/evaluate pipeline"""
+    mp3_to_wav_cfg["log_level"] = log_level
+    dataset_cfg["log_level"] = log_level
+    dataloader_cfg["log_level"] = log_level
+    model_cfg["log_level"] = log_level
+    train_cfg["log_level"] = log_level
+    generator_cfg["log_level"] = log_level
+
     # convert folder of mp3 files WAV files
-    dataset_cfg["input_folder"] = utils.convert_mp3_folder(**mp3_to_wav_cfg)
+    dataset_cfg["input_folder"] = utils.Mp3Converter(**mp3_to_wav_cfg).convert()
 
     # Create dataset from WAV files
     dataloader_cfg["dataset"] = WAVData(**dataset_cfg)
