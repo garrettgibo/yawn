@@ -8,11 +8,16 @@ from wavenet.modules import GatedActivationUnit
 class CausalConv(torch.nn.Module):
     """Causal Convolution for WaveNet"""
 
-    def __init__(self, in_channels, out_channels):
-        """Initialize causal convolution"""
+    def __init__(self, in_channels, res_channels):
+        """Initialize causal convolution.
+
+        Args:
+            in_channels: the number of channels for original input
+            res_channels: the number of channels for the residual stack
+        """
         super().__init__()
         self.conv = torch.nn.Conv1d(
-            in_channels, out_channels, kernel_size=2, stride=1, padding=1, bias=False
+            in_channels, res_channels, kernel_size=2, stride=1, padding=1, bias=False
         )
 
     def forward(self, data):
@@ -21,20 +26,20 @@ class CausalConv(torch.nn.Module):
 
 
 class ResidualStack(torch.nn.Module):
-    """Stack of ResidualLayers"""
+    """Stack of ResidualLayers."""
 
     def __init__(
         self,
-        in_channels: int,
-        out_channels: int,
+        res_channels: int,
+        skip_channels: int,
         num_dilation_loops: int = 3,
         dilation_limit: int = 9,
     ):
         """Initialize residual stack.
 
         Args:
-            in_channels: size of inputs for residual stack
-            out_channels: size of outputs for skip connections
+            res_channels: number of channels for inputs to residual stack
+            skip_channels: number of channels for skip connections
             num_dilation_loops: Number of times that full list of dilation
                 values will be repeated.
                 e.g. [1, 2, ..., 2**n, 1, 2, ..., 2**n, ...]
@@ -44,9 +49,9 @@ class ResidualStack(torch.nn.Module):
 
         """
         super().__init__()
-        self.num_dilation_loops = num_dilation_loops
-        self.dilation_limit = dilation_limit
-        self.residual_layers = self._create_residual_stack(in_channels, out_channels)
+        self.residual_layers = self._create_residual_stack(
+            res_channels, skip_channels, num_dilation_loops, dilation_limit
+        )
 
     def forward(self, data):
         """Iterate through residual layers stack"""
@@ -63,12 +68,24 @@ class ResidualStack(torch.nn.Module):
 
         return skip_output
 
-    def _create_residual_stack(self, in_channels, out_channels):
+    @staticmethod
+    def _create_residual_stack(
+        res_channels: int,
+        skip_channels: int,
+        num_dilation_loops: int,
+        dilation_limit: int,
+    ):
         """Create list of ResidualLayers that will make up the stack.
 
         Args:
-            in_channels: size of inputs for residual stack
-            out_channels: size of outputs for skip connections
+            res_channels: number of channels for inputs to residual stack
+            skip_channels: number of channels for skip connections
+            num_dilation_loops: Number of times that full list of dilation
+                values will be repeated.
+                e.g. [1, 2, ..., 2**n, 1, 2, ..., 2**n, ...]
+            dilation_limit: Dilation values will be 2**n where n is an integer
+                that climbs up to this limit. Default: 9
+                e.g. [1, 2, 4, ..., 2**9]
 
         Stack contains `self.num_dilation_loops * self.dilation_limit` number
         of residual layers. Where the dilations for each layer will have this
@@ -80,37 +97,72 @@ class ResidualStack(torch.nn.Module):
 
         """
         stack = []
-        for _ in range(self.num_dilation_loops):
-            for dilation in range(self.dilation_limit):
+        for _ in range(num_dilation_loops):
+            for dilation in range(dilation_limit):
                 stack.append(
-                    ResidualLayer(in_channels, out_channels, dilation=dilation)
+                    ResidualLayer(res_channels, skip_channels, dilation=dilation)
                 )
 
         return stack
 
 
 class ResidualLayer(torch.nn.Module):
-    """Single residual layer"""
+    """Single residual layer
 
-    def __init__(self, in_channels: int, out_channels: int, dilation: int):
-        """Initialize a residual layer"""
+    residual layer is based off of Figure 4 in: https://arxiv.org/abs/1609.03499
+                ^
+                |
+    4)  -------[+]
+        |       |
+    3)  |    [1 x 1]------> skip-connection
+        |       |
+    2)  |   ---[x]---
+        |   |       |
+        | [tanh]   [σ]
+        |   |       |
+    1)  | [dilated conv]
+        |       |
+        |------ |
+                |
+    """
+
+    def __init__(self, res_channels: int, skip_channels: int, dilation: int):
+        """Initialize a residual layer.
+
+        Args:
+            res_channels: number of channels for i/o in residual layers
+            skip_channels: number of channels for skip-connection
+            dilation: size of dilation
+
+        """
         super().__init__()
         self.dilated_causal_conv = DilatedCausalConvolution(
-            in_channels, out_channels, dilation
+            res_channels, res_channels, dilation
         )
         self.gated_activation = GatedActivationUnit()
-        self.conv = nn.Conv1d(
-            out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False
+        self.conv_res = nn.Conv1d(
+            res_channels, res_channels, kernel_size=1, stride=1, padding=0, bias=False
+        )
+        self.conv_skip = nn.Conv1d(
+            res_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False
         )
 
     def forward(self, data):
         """Pipeline for a single residual layer"""
+        # 1) dilated convolution
         filter_output, gate_output = self.dilated_causal_conv(data)
-        activation_output = self.gated_activation(filter_output, gate_output)
-        skip_output = self.conv(activation_output)
-        output = data + skip_output
 
-        return output, skip_output
+        # 2) gated activation unit from PixelCNN
+        activation_output = self.gated_activation(filter_output, gate_output)
+
+        # 3) 1x1 convs for residual and skip convs respectively
+        output_conv_res = self.conv_res(activation_output)
+        output_skip = self.conv_skip(activation_output)
+
+        # 4) Residual connection
+        output_res = data + output_conv_res
+
+        return output_res, output_skip
 
 
 class DilatedCausalConvolution(torch.nn.Module):

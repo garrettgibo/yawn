@@ -24,6 +24,7 @@ class WaveNet(torch.nn.Module):
                 skip channels is the same as input channels.
             res_channels: number of channels for residual input and output
             log_level: logging level
+
         """
         super().__init__()
         self.logger = utils.new_logger("WaveNet Model", level=log_level)
@@ -34,7 +35,7 @@ class WaveNet(torch.nn.Module):
                     (
                         "residual_stack",
                         ResidualStack(
-                            in_channels=res_channels, out_channels=in_channels
+                            res_channels=res_channels, skip_channels=in_channels
                         ),
                     ),
                     ("conv_1", nn.Conv1d(in_channels, in_channels, kernel_size=1)),
