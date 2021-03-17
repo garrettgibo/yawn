@@ -9,11 +9,73 @@ class WaveNet(torch.nn.Module):
     """TODO: class docstring"""
 
     def __init__(self):
+class ResidualStack(torch.nn.Module):
+    """Create a stack of residual layers"""
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        num_dilation_loops: int = 3,
+        dilation_limit: int = 9,
+    ):
+        """Initialize residual stack.
+
+        Args:
+            in_channels: size of inputs for residual stack
+            out_channels: size of outputs for skip connections
+            num_dilation_loops: Number of times that full list of dilation
+                values will be repeated.
+                e.g. [1, 2, ..., 2**n, 1, 2, ..., 2**n, ...]
+            dilation_limit: Dilation values will be 2**n where n is an integer
+                that climbs up to this limit. Default: 9
+                e.g. [1, 2, 4, ..., 2**9]
+
+        """
         super().__init__()
+        self.num_dilation_loops = num_dilation_loops
+        self.dilation_limit = dilation_limit
+        self.residual_layers = self._create_residual_stack(in_channels, out_channels)
 
     def forward(self, data):
-        """TODO: forward pass docstring"""
-        return data
+        """Iterate through residual layers stack"""
+        output = data
+        skip_connections = []
+
+        for layer in self.residual_layers:
+            # output is used for input to next residual layer
+            # skip_output is used for actual evaluation from entire stack
+            output, skip_output = layer(output)
+            skip_connections.append(skip_output)
+
+        skip_output = torch.sum(torch.stack(skip_connections), axis=0)
+
+        return skip_output
+
+    def _create_residual_stack(self, in_channels, out_channels):
+        """Create list of ResidualLayers that will make up the stack.
+
+        Args:
+            in_channels: size of inputs for residual stack
+            out_channels: size of outputs for skip connections
+
+        Stack contains `self.num_dilation_loops * self.dilation_limit` number
+        of residual layers. Where the dilations for each layer will have this
+        format respectively:
+        [1, 2, 4, ..., 2 ** self.dilation_limit,
+         1, 2, 4, ..., 2 ** self.dilation_limit,
+         ...
+         (for self.num_dilation_loops times)]
+
+        """
+        stack = []
+        for _ in range(self.num_dilation_loops):
+            for dilation in range(self.dilation_limit):
+                stack.append(
+                    ResidualLayer(in_channels, out_channels, dilation=dilation)
+                )
+
+        return stack
 
 
 class ResidualLayer(torch.nn.Module):
