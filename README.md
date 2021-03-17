@@ -1,10 +1,9 @@
-# YAWN
-[![Lint Code Base](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml/badge.svg)](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml)
+# YAWN &middot; [![Lint Code Base](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml/badge.svg)](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml)
 
 Yet Another WaveNet
 
 - [Blog](https://deepmind.com/blog/article/wavenet-generative-model-raw-audio),
-- [Paper](https://arxiv.org/abs/1609.03499))
+- [Paper](https://arxiv.org/abs/1609.03499)
 
 This implementation is inspired by the following sources:
 
