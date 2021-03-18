@@ -28,24 +28,28 @@ class WaveNet(torch.nn.Module):
         """
         super().__init__()
         self.logger = utils.new_logger(self.__class__.__name__, level=log_level)
-        self.causal_conv = CausalConv(in_channels, res_channels, kernel_size=2)
-        self.residual_stack = ResidualStack(
-            res_channels=res_channels, skip_channels=in_channels
+        self.model = nn.Sequential(
+            OrderedDict(
+                [
+                    (
+                        "causal_conv",
+                        CausalConv(in_channels, res_channels, kernel_size=1),
+                    ),
+                    (
+                        "residual_stack",
+                        ResidualStack(
+                            res_channels=res_channels, skip_channels=in_channels
+                        ),
+                    ),
+                    ("conv_1", nn.Conv1d(in_channels, in_channels, kernel_size=1)),
+                    ("relu_1", nn.ReLU()),
+                    ("conv_2", nn.Conv1d(in_channels, in_channels, kernel_size=1)),
+                    ("relu_2", nn.ReLU()),
+                    ("softmax", nn.Softmax(dim=1)),
+                ]
+            )
         )
-        self.conv_1 = nn.Conv1d(in_channels, in_channels, kernel_size=1)
-        self.relu_1 = nn.ReLU()
-        self.conv_2 = nn.Conv1d(in_channels, in_channels, kernel_size=1)
-        self.relu_2 = nn.ReLU()
-        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, data: torch.Tensor) -> torch.Tensor:
         """Forward pass through full architecture"""
-        data = self.causal_conv(data)
-        data = self.residual_stack(data)
-        data = self.conv_1(data)
-        data = self.relu_1(data)
-        data = self.conv_2(data)
-        data = self.relu_2(data)
-        data = self.softmax(data)
-
-        return data
+        return self.model(data)
