@@ -20,7 +20,8 @@ def train(
     num_epochs: int,
     learning_rate: float,
     resume: bool = False,
-    checkpoint_path: str = None,
+    checkpoint_load_path: str = None,
+    checkpoint_save_path: str = None,
     save_every: int = 1,
     log_level: int = 30,
 ):
@@ -37,7 +38,7 @@ def train(
     """
     logger = utils.new_logger("Train", level=log_level)
 
-    current_time = time.strftime("%m_%d_%y_%H_%M_%S", time.localtime())
+    current_time = time.strftime("_%m_%d_%y_%H_%M_%S", time.localtime())
     model_name = model_name + current_time
 
     criterion = nn.CrossEntropyLoss()
@@ -52,8 +53,8 @@ def train(
     # load checkpoint if needed/ wanted
     start_epoch = 0
     if resume:
-        model, optim, start_epoch = utils.load_model(model, optim, checkpoint_path)
-        logger.info("Loaded checkpoint from: %s", checkpoint_path)
+        model, optim, start_epoch = utils.load_model(model, optim, checkpoint_load_path)
+        logger.info("Loaded checkpoint from: %s", checkpoint_load_path)
 
     # Main training loop
     for epoch in range(start_epoch, start_epoch + num_epochs):
@@ -93,11 +94,11 @@ def train(
         # maybe do a test pass every N=1 epochs
         if epoch % save_every == save_every - 1:
             ckpt_name = f"{model_name}_epoch_{epoch}.pt"
-            utils.save_model(model, optim, epoch, ckpt_name)
-            logger.info("Saved model at epoch: %d", epoch)
+            utils.save_model(
+                model, optim, epoch, checkpoint_save_path, ckpt_name, logger
+            )
 
     ckpt_name = f"{model_name}_fin.pt"
-    utils.save_model(model, optim, epoch, ckpt_name)
-    logger.info("Saved Final Model")
+    utils.save_model(model, optim, epoch, checkpoint_save_path, ckpt_name, logger)
 
     return ckpt_name

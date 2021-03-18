@@ -93,22 +93,29 @@ def load_model(model, optimizer, path: str):
     return model, optimizer, epoch
 
 
-def save_model(model, optimizer, epoch: int, name: str) -> None:
+def save_model(
+    model, optimizer, epoch: int, checkpoint_dir: str, name: str, logger
+) -> None:
     """Wrapper around saving a PyTorch model.
 
     Args:
         model: The model that is saved.
         optimizer: The optimizer being used on the provided model
         epoch: Current epoch number
+        checkpoint_dir: Path to directory of checkpoints
         name: Name of checkpoint
 
     """
+    if not os.path.isdir(checkpoint_dir):
+        os.mkdir(checkpoint_dir)
+
     checkpoint = {
         "epoch": epoch,
         "net": model.state_dict(),
         "optim": optimizer.state_dict(),
     }
-    torch.save(checkpoint, name)
+    torch.save(checkpoint, f"{checkpoint_dir}/{name}")
+    logger.info("Saved %s", name)
 
 
 def get_device():

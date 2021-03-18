@@ -19,11 +19,12 @@
     },
     "train_cfg": {
         "model_name": "wavenet",
-        "num_epochs": 5,
+        "num_epochs": 100,
         "learning_rate": 0.001,
         "resume": false,
-        "checkpoint_path": null,
-        "save_every": 1
+        "checkpoint_load_path": null,
+        "checkpoint_save_path": "checkpoints",
+        "save_every": 5
     },
     "generator_cfg": {}
 }
