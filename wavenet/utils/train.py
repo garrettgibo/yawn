@@ -40,10 +40,9 @@ def train(
 
     criterion = nn.CrossEntropyLoss()
 
-    # if running on GPU and we want to use cuda move model there
-    use_cuda = torch.cuda.is_available()
-    if use_cuda:
-        model = model.cuda()
+    # if running on GPU and we want to use cuda device
+    device = utils.get_device()
+    model.to(device)
 
     # create optimizers
     optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -64,9 +63,9 @@ def train(
         start_time = time.time()
 
         for _, (data, target) in pbar:
-            # send data to GPU
-            if use_cuda:
-                data, target = data.cuda(), target.cuda()
+            # put data on correct device
+            data = data.to(device, dtype=torch.float32)
+            target = target.to(device, dtype=torch.float32)
 
             prepare_time = start_time - time.time()
 

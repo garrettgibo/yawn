@@ -109,3 +109,8 @@ def save_model(model, optimizer, epoch: int, name: str) -> None:
         "optim": optimizer.state_dict(),
     }
     torch.save(checkpoint, name)
+
+
+def get_device():
+    """Determine if cuda is avilable and return correct device"""
+    return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
