@@ -143,13 +143,6 @@ class WAVData(Dataset):
 
         return one_hot
 
-    @staticmethod
-    def _one_hot_decode(data: np.ndarray, axis=1) -> np.ndarray:
-        """TODO"""
-        decoded = np.argmax(data, axis=axis)
-
-        return decoded
-
 
 class WAVDataLoader(DataLoader):
     """Simple dataloader wrapper."""
