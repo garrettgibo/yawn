@@ -24,7 +24,17 @@ class WAVData(Dataset):
         num_classes: int = 256,
         log_level: int = 20,
     ):
-        self.logger = utils.new_logger("WAVData", level=log_level)
+        """Initialize the WAV dataset.
+
+        Args:
+            input_folder: path to folder of WAV files
+            input_length: length to set for input to train on
+            output_length: length to set for outputs
+            num_classes: number classes to bin WAV input into
+            log_level: logging level
+
+        """
+        self.logger = utils.new_logger(self.__class__.__name__, level=log_level)
         self.input_folder = input_folder
         self.input_length = int(input_length)
         self.output_length = int(output_length)
@@ -75,10 +85,11 @@ class WAVData(Dataset):
 
         # Iterate over data as many times as allowed
         for i in range(0, len(data) - data_length, data_length):
+            # Need data and target to have structure Tensor[num_channels, length]
             data_segments.append(
                 {
-                    "x": data[i : i + self.input_length],
-                    "y": data[i + self.input_length : i + data_length],
+                    "x": data[i : i + self.input_length].T,
+                    "y": data[i + self.input_length : i + data_length].T,
                 }
             )
 
@@ -107,8 +118,9 @@ class WAVData(Dataset):
         data = self.mu_law_encoding(data)
         bins = np.linspace(-1, 1, self.num_classes)
         data_quantized = np.digitize(data, bins) - 1
+        encoded = self._one_hot_encode(data_quantized)
 
-        return data_quantized
+        return encoded
 
     def mu_law_encoding(self, data: np.ndarray) -> np.ndarray:
         """Apply non-linear mu-law encoding"""
@@ -123,6 +135,20 @@ class WAVData(Dataset):
         )
 
         return data
+
+    def _one_hot_encode(self, data: np.ndarray) -> np.ndarray:
+        """Create one hot encoding for WAV. """
+        one_hot = np.zeros((data.size, self.num_classes), dtype=float)
+        one_hot[np.arange(data.size), data.ravel()] = 1
+
+        return one_hot
+
+    @staticmethod
+    def _one_hot_decode(data: np.ndarray, axis=1) -> np.ndarray:
+        """TODO"""
+        decoded = np.argmax(data, axis=axis)
+
+        return decoded
 
 
 class WAVDataLoader(DataLoader):
@@ -139,4 +165,4 @@ class WAVDataLoader(DataLoader):
         super().__init__(
             dataset, shuffle=shuffle, batch_size=batch_size, num_workers=num_workers
         )
-        self.logger = utils.new_logger("WAVDataLoader", level=log_level)
+        self.logger = utils.new_logger(self.__class__.__name__, level=log_level)
