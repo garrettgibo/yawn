@@ -23,7 +23,7 @@ class Mp3Converter:
             sample_rate: desired sample rate to set WAV files to
             log_level: level to log at for converter. Default is 20 (logging.INFO)
         """
-        self.logger = utils.new_logger("Mp3Converter", level=log_level)
+        self.logger = utils.new_logger(self.__class__.__name__, level=log_level)
         self.input_folder = input_folder
         self.sample_rate = sample_rate
 

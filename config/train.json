@@ -4,22 +4,22 @@
         "sample_rate": 16000
     },
     "dataset_cfg": {
-        "input_length": 2e5,
-        "output_length": 1e5,
+        "input_length": 32000,
+        "output_length": 32000,
         "mu": 255,
         "num_classes": 256
     },
     "dataloader_cfg": {
-        "batch_size": 10,
+        "batch_size": 1,
         "shuffle": true
     },
     "model_cfg": {
-        "res_channels": 1
         "in_channels": 256,
+        "res_channels": 32
     },
     "train_cfg": {
         "model_name": "wavenet",
-        "num_epochs": 100,
+        "num_epochs": 5,
         "learning_rate": 0.001,
         "resume": false,
         "checkpoint_path": null,
