@@ -90,11 +90,11 @@ def train(
             )
             start_time = time.time()
 
-            # maybe do a test pass every N=1 epochs
-            if epoch % save_every == save_every - 1:
-                ckpt_name = f"{model_name}_epoch_{epoch}.pt"
-                utils.save_model(model, optim, epoch, ckpt_name)
-                logger.info("Saved model at epoch: %d", epoch)
+        # maybe do a test pass every N=1 epochs
+        if epoch % save_every == save_every - 1:
+            ckpt_name = f"{model_name}_epoch_{epoch}.pt"
+            utils.save_model(model, optim, epoch, ckpt_name)
+            logger.info("Saved model at epoch: %d", epoch)
 
     ckpt_name = f"{model_name}_fin.pt"
     utils.save_model(model, optim, epoch, ckpt_name)
