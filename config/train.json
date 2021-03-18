@@ -23,7 +23,7 @@
         "learning_rate": 0.001,
         "resume": false,
         "checkpoint_path": null,
-        "save_every": 5
+        "save_every": 1
     },
     "generator_cfg": {}
 }
