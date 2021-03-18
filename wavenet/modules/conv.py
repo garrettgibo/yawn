@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wavenet.utils as utils
 from wavenet.modules import GatedActivationUnit
 
 
@@ -153,6 +154,10 @@ class ResidualLayer(torch.nn.Module):
             res_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False
         )
 
+        device = utils.get_device()
+        self.conv_res.to(device)
+        self.conv_skip.to(device)
+
     def forward(self, data):
         """Pipeline for a single residual layer"""
         # 1) dilated convolution
@@ -203,6 +208,10 @@ class DilatedCausalConvolution(torch.nn.Module):
             padding=0,
             bias=False,
         )
+
+        device = utils.get_device()
+        self.conv_filter.to(device)
+        self.conv_gate.to(device)
 
     def forward(self, data: torch.Tensor) -> torch.Tensor:
         """Apply dilated convolutions and create filter and gates ouputs"""
