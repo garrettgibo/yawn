@@ -10,6 +10,8 @@ import torch.nn as nn
 import wavenet.utils as utils
 from tqdm import tqdm
 
+torch.backends.cudnn.benchmark = True
+
 
 def train(
     model,
@@ -19,7 +21,7 @@ def train(
     learning_rate: float,
     resume: bool = False,
     checkpoint_path: str = None,
-    save_every: int = 10,
+    save_every: int = 1,
     log_level: int = 30,
 ):
     """Train model.
@@ -71,6 +73,9 @@ def train(
 
             # forward and backward pass
             out = model(data)
+
+            target = torch.argmax(target, dim=1)
+
             loss = criterion(out, target)
             optim.zero_grad()
             loss.backward()
