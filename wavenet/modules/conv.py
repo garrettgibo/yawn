@@ -1,23 +1,29 @@
 """Convolution layers for WaveNet"""
 import torch
 import torch.nn as nn
-import wavenet
+import torch.nn.functional as F
 from wavenet.modules import GatedActivationUnit
 
 
 class CausalConv(torch.nn.Module):
     """Causal Convolution for WaveNet"""
 
-    def __init__(self, in_channels, res_channels):
+    def __init__(self, in_channels: int, res_channels: int, kernel_size: int):
         """Initialize causal convolution.
 
         Args:
             in_channels: the number of channels for original input
             res_channels: the number of channels for the residual stack
+
         """
         super().__init__()
         self.conv = torch.nn.Conv1d(
-            in_channels, res_channels, kernel_size=2, stride=1, padding=1, bias=False
+            in_channels,
+            res_channels,
+            kernel_size=kernel_size,
+            stride=1,
+            padding=0,
+            bias=False,
         )
 
     def forward(self, data):
@@ -100,7 +106,7 @@ class ResidualStack(torch.nn.Module):
         for _ in range(num_dilation_loops):
             for dilation in range(dilation_limit):
                 stack.append(
-                    ResidualLayer(res_channels, skip_channels, dilation=dilation)
+                    ResidualLayer(res_channels, skip_channels, dilation=2 ** dilation)
                 )
 
         return stack
@@ -178,6 +184,7 @@ class DilatedCausalConvolution(torch.nn.Module):
 
         """
         super().__init__()
+        self.dilation = dilation
         self.conv_filter = nn.Conv1d(
             in_channels,
             out_channels,
@@ -197,9 +204,14 @@ class DilatedCausalConvolution(torch.nn.Module):
             bias=False,
         )
 
-    def forward(self, data):
+    def forward(self, data: torch.Tensor) -> torch.Tensor:
         """Apply dilated convolutions and create filter and gates ouputs"""
         filter_output = self.conv_filter(data)
         gate_output = self.conv_gate(data)
+
+        # a conv with dilation decreases the size of the Tensor by the dilation amount,
+        # so we need to pad the output
+        filter_output = F.pad(filter_output, (self.dilation, 0))
+        gate_output = F.pad(gate_output, (self.dilation, 0))
 
         return filter_output, gate_output
