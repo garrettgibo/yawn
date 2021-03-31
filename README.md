@@ -1,9 +1,11 @@
-# YAWN &middot; [![Lint Code Base](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml/badge.svg)](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml)
+# YAWN [Work In Progress] &middot; [![Lint Code Base](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml/badge.svg)](https://github.com/garrettgibo/WaveNetClone/actions/workflows/linter.yml)
 
 Yet Another WaveNet (implemented in PyTorch)
 
 This is an implementation of WaveNet that aims to be used for training on and
 generating different forms of music.
+
+
 
 ## Usage
 
